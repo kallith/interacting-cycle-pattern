@@ -41,6 +41,34 @@ class Permutation:
     def get_cycles(self):
         return self.cycles
 
+def cycle_notation_to_one_line_notation(cycle_perm):
+	#add check for valididity
+	#
+	total_length = sum([len(cycle) for cycle in cycle_perm])
+	res = [None] * total_length
+	for cycle in cycle_perm:
+		for i,el in enumerate(cycle):
+			res[el] = cycle[(i+1) % len(cycle)]
+	return res
+	
+def one_line_notation_to_cycle_notation(one_perm):
+	#add check for valididity
+	#
+	res = []
+	tmp_set = set(one_perm)
+	while len(tmp_set) != 0:
+		popped = tmp_set.pop()
+		curr = popped
+		res.append([])
+		while 1:
+			next = one_perm[curr]
+			res[-1].append(curr)
+			if popped == next:
+				break
+			curr = next
+		tmp_set.difference_update(res[-1])
+	return res
+
 #best function
 def normalize_set_of_substrings(substrings):
     flattened_substrings = sorted([elem for substring in substrings for elem in substring])
