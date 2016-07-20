@@ -17,11 +17,14 @@ class InteractingCyclePattern:
         return self.numcycles
     def get_pattern_cycle_pair(self,i):
         return self.patt[i] if 0 <= i < self.numcycles else None
+    def get_adjacency_set(self):
+        return self.adjlis
+    def __len__(self):
+        return self.length
     def __str__(self):
         tmp = []
         for substr,whole in self.patt:
             tmp.append("({})" if whole else "[{}]")
-            print(substr)
             tmp[-1] = tmp[-1].format(",".join(str(item) for item in substr))
         patt_str = "".join(tmp)
         adj_str = ",".join(str(item) for item in self.adjlis)
@@ -33,41 +36,47 @@ class Permutation:
         assert(type(data) is list)
         if all(type(d) is int for d in data):
             self.perm = list(data)
+            self.cycles = one_line_notation_to_cycle_notation(self.perm)
         elif all(type(d) is list for d in data) and all(type(d) is int for lis in data for d in lis):
             self.cycles = [list(d) for d in data]
+            self.perm = cycle_notation_to_one_line_notation(self.cycles)
         else:
             assert("help")
         # check if elements are legal
+    def __len__(self):
+        return len(self.perm)
     def get_cycles(self):
         return self.cycles
 
 def cycle_notation_to_one_line_notation(cycle_perm):
-	#add check for valididity
-	#
-	total_length = sum([len(cycle) for cycle in cycle_perm])
-	res = [None] * total_length
-	for cycle in cycle_perm:
-		for i,el in enumerate(cycle):
-			res[el] = cycle[(i+1) % len(cycle)]
-	return res
-	
+    tmp = [inner_element for lis in cycle_perm for inner_element in lis]
+    assert(len(set(tmp)) == len(tmp))
+    assert(set(tmp) == set(range(len(tmp))))
+    total_length = sum([len(cycle) for cycle in cycle_perm])
+    res = [None] * total_length
+    for cycle in cycle_perm:
+        for i,el in enumerate(cycle):
+            res[el] = cycle[(i+1) % len(cycle)]
+    return res
+
 def one_line_notation_to_cycle_notation(one_perm):
-	#add check for valididity
-	#
-	res = []
-	tmp_set = set(one_perm)
-	while len(tmp_set) != 0:
-		popped = tmp_set.pop()
-		curr = popped
-		res.append([])
-		while 1:
-			next = one_perm[curr]
-			res[-1].append(curr)
-			if popped == next:
-				break
-			curr = next
-		tmp_set.difference_update(res[-1])
-	return res
+    #add check for valididity
+    assert(len(set(one_perm)) == len(one_perm))
+    assert(set(one_perm) == set(range(len(one_perm))))
+    res = []
+    tmp_set = set(one_perm)
+    while len(tmp_set) != 0:
+        popped = tmp_set.pop()
+        curr = popped
+        res.append([])
+        while 1:
+            next = one_perm[curr]
+            res[-1].append(curr)
+            if popped == next:
+                break
+            curr = next
+        tmp_set.difference_update(res[-1])
+    return res
 
 #best function
 def normalize_set_of_substrings(substrings):
@@ -88,7 +97,17 @@ def match(perm,patt):
             if any(a!=b for a,b in zip(cycle,norm[i])):
                 break
         else:
-            print("match", substrings)
+            for adj in patt.get_adjacency_set():
+                for i,norm_substring in enumerate(norm):
+                    for j,elem in enumerate(norm_substring):
+                        if elem == adj:
+                            a = substrings[i][j]
+                        if elem == (adj+1)%len(patt):
+                            b = substrings[i][j]
+                if (a + 1) % len(perm) != b:
+                    break
+            else:
+                yield substrings
 
 def available_substrings(perm, patt):
     ind = 0
@@ -128,6 +147,6 @@ def available_substrings(perm, patt):
 
 if __name__ == "__main__":
     perm = Permutation([[0,4],[1,5],[2,6,3,7]])
-    patt = InteractingCyclePattern([([0,2],False),([1,3],True)],[0,2])
-    match(perm,patt)
-    print(patt)
+    patt = InteractingCyclePattern([([0,2],False),([1,3],False)],[0,2])
+    for m in match(perm,patt):
+        print("match", m)
