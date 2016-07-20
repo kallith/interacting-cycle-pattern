@@ -16,8 +16,16 @@ class InteractingCyclePattern:
     def number_of_cycles(self):
         return self.numcycles
     def get_pattern_cycle_pair(self,i):
-        assert(0 <= i < self.numcycles)
-        return self.patt[i]
+        return self.patt[i] if 0 <= i < self.numcycles else None
+    def __str__(self):
+        tmp = []
+        for substr,whole in self.patt:
+            tmp.append("({})" if whole else "[{}]")
+            print(substr)
+            tmp[-1] = tmp[-1].format(",".join(str(item) for item in substr))
+        patt_str = "".join(tmp)
+        adj_str = ",".join(str(item) for item in self.adjlis)
+        return "({}, {{{}}})".format(patt_str, adj_str)
 
 class Permutation:
     # cycleperm is a list of lists
@@ -47,7 +55,6 @@ def match(perm,patt):
     count = 0
     for substrings in available_substrings(perm,patt):
         norm = normalize_set_of_substrings(substrings)
-        print(substrings,norm,patt.patt)
         for i,substring in enumerate(substrings):
             cycle = patt.get_pattern_cycle_pair(i)[0]
             if any(a!=b for a,b in zip(cycle,norm[i])):
@@ -93,5 +100,6 @@ def available_substrings(perm, patt):
 
 if __name__ == "__main__":
     perm = Permutation([[0,4],[1,5],[2,6,3,7]])
-    patt = InteractingCyclePattern([([0,2],False),([1,3],False)],[])
+    patt = InteractingCyclePattern([([0,2],False),([1,3],True)],[0,2])
     match(perm,patt)
+    print(patt)
