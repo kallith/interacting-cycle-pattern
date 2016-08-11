@@ -1,6 +1,34 @@
-#!/usr/bin/env python3
+def cycle_notation_to_one_line_notation(cycle_perm):
+    tmp = [inner_element for lis in cycle_perm for inner_element in lis]
+    assert(len(set(tmp)) == len(tmp))
+    assert(set(tmp) == set(range(len(tmp))))
+    res = [None] * len(tmp)
+    for cycle in cycle_perm:
+        for i,el in enumerate(cycle):
+            res[el] = cycle[(i+1) % len(cycle)]
+    return res
+
+def one_line_notation_to_cycle_notation(one_perm):
+    #add check for valididity
+    assert(len(set(one_perm)) == len(one_perm))
+    assert(set(one_perm) == set(range(len(one_perm))))
+    res = []
+    tmp_set = set(one_perm)
+    while len(tmp_set) != 0:
+        popped = tmp_set.pop()
+        cur = popped
+        cycle=[]
+        while 1:
+            nxt = one_perm[cur]
+            cycle.append(cur)
+            if popped == nxt:
+                break
+            cur = nxt
+        res.append(cycle)
+        tmp_set.difference_update(cycle)
+    return res
+
 class InteractingCyclePattern:
-    # patt      is a tuple list of doubles (list, boolean), list
     def __init__(self, patt, adjlis):
         assert(type(patt) is list)
         assert(all(type(double) is tuple for double in patt))
@@ -22,61 +50,23 @@ class InteractingCyclePattern:
     def __len__(self):
         return self.length
     def __str__(self):
-        tmp = []
-        for substr,whole in self.patt:
-            tmp.append("({})" if whole else "[{}]")
-            tmp[-1] = tmp[-1].format(",".join(str(item) for item in substr))
-        patt_str = "".join(tmp)
-        adj_str = ",".join(str(item) for item in self.adjlis)
+        patt_str = ''.join([('({})' if whole else '[{}]').format(' '.join(str(item) for item in substr)) for substr,whole in self.patt])
+        adj_str = ", ".join(str(item) for item in self.adjlis)
         return "({}, {{{}}})".format(patt_str, adj_str)
+    def occurrences_in(self, perm):
+        for m in match(perm,self):
+            yield m
+        return
+    def avoided_by(self, perm):
+        for occ in self.occurrences_in(perm):
+            # if we find an occurrence we stop
+            return False
+        # otherwise we know the permutation avoids the pattern
+        return True
+    def contained_in(self, perm):
+        return not self.avoided_by(perm)
 
-class Permutation:
-    # cycleperm is a list of lists
-    def __init__(self, data):
-        assert(type(data) is list)
-        if all(type(d) is int for d in data):
-            self.perm = list(data)
-            self.cycles = one_line_notation_to_cycle_notation(self.perm)
-        elif all(type(d) is list for d in data) and all(type(d) is int for lis in data for d in lis):
-            self.cycles = [list(d) for d in data]
-            self.perm = cycle_notation_to_one_line_notation(self.cycles)
-        else:
-            assert("help")
-        # check if elements are legal
-    def __len__(self):
-        return len(self.perm)
-    def get_cycles(self):
-        return self.cycles
 
-def cycle_notation_to_one_line_notation(cycle_perm):
-    tmp = [inner_element for lis in cycle_perm for inner_element in lis]
-    assert(len(set(tmp)) == len(tmp))
-    assert(set(tmp) == set(range(len(tmp))))
-    total_length = sum([len(cycle) for cycle in cycle_perm])
-    res = [None] * total_length
-    for cycle in cycle_perm:
-        for i,el in enumerate(cycle):
-            res[el] = cycle[(i+1) % len(cycle)]
-    return res
-
-def one_line_notation_to_cycle_notation(one_perm):
-    #add check for valididity
-    assert(len(set(one_perm)) == len(one_perm))
-    assert(set(one_perm) == set(range(len(one_perm))))
-    res = []
-    tmp_set = set(one_perm)
-    while len(tmp_set) != 0:
-        popped = tmp_set.pop()
-        curr = popped
-        res.append([])
-        while 1:
-            next = one_perm[curr]
-            res[-1].append(curr)
-            if popped == next:
-                break
-            curr = next
-        tmp_set.difference_update(res[-1])
-    return res
 
 #best function
 def normalize_set_of_substrings(substrings):
@@ -126,7 +116,6 @@ def available_substrings(perm, patt):
                     tmp = perm_cycle[i:i+len_patt]
                     if all(elem not in [a for lis in res[:ind] for a in lis] for elem in tmp):
                         res2.append(tmp)
-                    
         return iter(res2)
     iter_lis[ind] = calc_iter(ind)
 
@@ -145,8 +134,41 @@ def available_substrings(perm, patt):
                 iter_lis[ind] = None
                 ind -= 1
 
-if __name__ == "__main__":
-    perm = Permutation([[0,4],[1,5],[2,6,3,7]])
-    patt = InteractingCyclePattern([([0,2],False),([1,3],False)],[0,2])
-    for m in match(perm,patt):
-        print("match", m)
+class Permutation:
+    """
+A permutation can either be initialized using one-line notation as a list of integers or in cycle notation as a list of list of integers.
+The following two are equivalent
+    perm = Permutation([0,3,1,2])
+    perm = Permutation([[0],[1,3,2]])
+Furthermore a permutation object of length n must be initialized with each integer in range(n) exactly once.
+    """
+    def __init__(self, data):
+
+        assert(type(data) is list)
+        if all(type(d) is int for d in data):
+            self.perm = list(data)
+            self.cycles = one_line_notation_to_cycle_notation(self.perm)
+        elif all(type(d) is list for d in data) and all(type(d) is int for lis in data for d in lis):
+            self.cycles = [list(d) for d in data]
+            self.perm = cycle_notation_to_one_line_notation(self.cycles)
+        else:
+            assert("help")
+        # check if elements are legal
+    def __len__(self):
+        return len(self.perm)
+    def __eq__(self,other):
+        return len(self) == len(other) and all(a == b for a,b in zip(self.perm,other.perm))
+    def __str__(self):
+        return ''.join(['({})'.format(' '.join(str(elem) for elem in cycle)) for cycle in self.cycles])
+    def get_cycles(self):
+        return self.cycles
+    def occurrences(self, patt):
+        return patt.occurrences_in(self)
+    def avoids(self, patt):
+        return patt.avoided_by(self)
+    def contains(self, patt):
+        return not patt.contained_in(self)
+
+
+def set_avoids(perm, patts):
+    return all(patt.avoided_by(perm) for patt in patts)
