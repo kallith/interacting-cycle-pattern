@@ -175,14 +175,11 @@ def available_substrings(perm, patt):
     res = [None] * k
     # sort the cycles by increasing length along with doubling each list for easier use
     perm_cycles = [lis*2 for lis in sorted(perm.get_cycles(), key=lambda cycle:len(cycle))]
-    print("permcycles", perm_cycles)
 
     def calc_iter(ind):
         '''
         Returns iterable 
         '''
-        print('ind')
-        print(ind)
         res2 = []
         for perm_cycle in perm_cycles:
             # whole tracks whether we have a cycle in braces or not (need the whole cycle or not)
@@ -197,8 +194,6 @@ def available_substrings(perm, patt):
                     if all(elem not in [a for lis in res[:ind] for a in lis] for elem in tmp):
                         res2.append(tmp)
                     else:
-                        print("oops")
-                        print(tmp)
         return iter(res2)
     iter_lis[ind] = calc_iter(ind)
 
