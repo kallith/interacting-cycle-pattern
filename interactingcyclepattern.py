@@ -1,6 +1,7 @@
 def cycle_notation_to_one_line_notation(cycle_perm):
     '''
-    Takes a permutation in cycle notation as input and returns the permutation in one-line notation.
+    Takes a permutation in cycle notation as input and returns the permutation in
+    one-line notation.
     Cycle notation is represented by a list of list of integers.
     One-line notation is represented as a list of integers.
 
@@ -21,7 +22,8 @@ def cycle_notation_to_one_line_notation(cycle_perm):
 
 def one_line_notation_to_cycle_notation(one_perm):
     '''
-    Takes a permutation in one-line notation as input and returns the permutation in cycle notation.
+    Takes a permutation in one-line notation as input and returns the permutation in
+    cycle notation.
     One-line notation is represented as a list of integers.
     Cycle notation is represented by a list of list of integers.
 
@@ -52,7 +54,10 @@ class InteractingCyclePattern:
     '''
     InceractingCyclePattern(patt, adjlis)
 
-    patt should be a list of tuples, where the first element is a list of integers(a cycle in the pattern) and the second element is a boolean variable (True meaning that the cycle is in braces not brackets), and adjlis should be a list of integers.
+    patt should be a list of tuples, where the first element is a list of integers
+    (a cycle in the pattern) and the second element is a boolean variable (True
+    meaning that the cycle is in braces not brackets), and  adjlis should be a list
+    of integers.
 
     For example the following interacting cycle patterns are initialized like so:
     # [0 2][1 3], {}
@@ -131,7 +136,8 @@ class InteractingCyclePattern:
 
 def normalize_set_of_substrings(substrings):
     '''
-    Takes a list of lists as an argument and returns a list of lists where each element has been normalized.
+    Takes a list of lists as an argument and returns a list of lists where each
+    element has been normalized.
     >>> normalize_set_of_substrings([[1,4],[3,6]])
     [[0, 2], [1, 3]]
     '''
@@ -145,7 +151,8 @@ def normalize_set_of_substrings(substrings):
 
 def available_substrings(perm, patt):
     '''
-    Generator that yields all substrings from the permutation perm that will match the cycles in the interacting cycle pattern patt.
+    Generator that yields all substrings from the permutation perm that will match
+    the cycles in the interacting cycle pattern patt.
     '''
     ind = 0
     k = patt.number_of_cycles()
@@ -219,11 +226,12 @@ def match(perm,patt):
 
 class Permutation:
     """
-A permutation object can either be initialized using one-line notation, as a list of integers, or in cycle notation, as a list of list of integers.
-This means the following are equivalent:
-    perm = Permutation([0,3,1,2])
-    perm = Permutation([[0],[1,3,2]])
-Furthermore a permutation object of length n must be initialized using each integer in range(n) exactly once.
+    A permutation object can either be initialized using one-line notation, as a list
+    of integers, or in cycle notation, as a list of list of integers.
+    This means the following are equivalent:
+        perm = Permutation([0,3,1,2])
+        perm = Permutation([[0],[1,3,2]])
+    Furthermore a permutation object of length n must be initialized using each integer in range(n) exactly once.
     """
     def __init__(self, data):
         assert(type(data) is list), "Invalid argument, Permutation requires a list as an argument"
@@ -251,7 +259,8 @@ Furthermore a permutation object of length n must be initialized using each inte
         return self.cycles
     def occurrences(self, patt):
         '''
-        Returns generator that yields each occurence of the interaction cycle pattern patt in the permutation.
+        Returns generator that yields each occurence of the interaction cycle pattern
+        patt in the permutation.
         '''
         return patt.occurrences_in(self)
     def avoids(self, patt):
@@ -268,6 +277,7 @@ Furthermore a permutation object of length n must be initialized using each inte
 
 def set_avoids(perm, patts):
     '''
-    Returns true if the permutation perm avoids all the interacting cycle patterns in the collection patts.
+    Returns true if the permutation perm avoids all the interacting cycle patterns in
+    the collection patts.
     '''
     return all(patt.avoided_by(perm) for patt in patts)
