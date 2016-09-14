@@ -193,7 +193,6 @@ def available_substrings(perm, patt):
                     # we add the element cycle to our result if the elements have not appeared in our result before
                     if all(elem not in [a for lis in res[:ind] for a in lis] for elem in tmp):
                         res2.append(tmp)
-                    else:
         return iter(res2)
     iter_lis[ind] = calc_iter(ind)
 
