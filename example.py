@@ -18,6 +18,7 @@ if __name__ == "__main__":
                 # [0 2](1 3), {}
                 InteractingCyclePattern([([0,2],False),([1,3],True)],[])
             ]
+
     # When we print out all occurrences of the patterns in the permutation initialized above
     for patt in patts:
         print("All occurrences of {} in {}".format(patt,perm1))
